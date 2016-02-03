@@ -12,6 +12,7 @@ See that, that is what BasicMongoPersistentEntity constructor does. It is provid
 **2. Event hierarchy:**
 
 [UserEvent](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/entities/UserEvent.java)
+
 [UserCreatedEvent](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/entities/UserCreatedEvent.java)
 
 Notice @EventRoot is declared locally on UserEvent, but not on UserCreatedEvent. Notice that it has a collection attribute, a collection name, set to a given value. 
@@ -26,7 +27,7 @@ Notice a  custom implementation is provided for getInitialEntitySet() cause we a
 
 **4. Test**
 
-(Tests)[https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/test/java/com/customannotationbug/tests/Tests.java]
+[Tests](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/test/java/com/customannotationbug/tests/Tests.java)
 
 *Expected behavior*. 
 Cause spring data mongodb relies on AnnotationUtils, it should provide full support for custom annotations and should support Springs 4.2 AliasFor annotations. So both entities, when made persistententities, should have the same collection name provided. 
@@ -41,19 +42,24 @@ Document document = AnnotationUtils.findAnnotation(rawType, Document.class);
 ```
 
 At first, i thought this was related to @Document being mark as @Inherited. And could it be? 
+
 The parent entity has both annotations, a locally declared @EventRoot annotation and an inherited @Document annotation.
+
 The child entity has an inherited @Document annotation and a @EventRoot annotation in its parent. 
+
 When using AnnotationUtils.findAnnotation() would it be possible to synthesize AliasFor @Document attributes for any of these entities? 
 
 I went a bit deeper with this, but it seems there is a problem with AnnotationUtils caches.
+
 Annotation filters are used when looking for candidates entities in the classpath to be loaded. 
 
-Just consider @EventRoot annotated resources.See ( getInitialEntitySet() )[https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/AppConfig.java]
+Just consider @EventRoot annotated resources.See [getInitialEntitySet()](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/AppConfig.java)
  
 Each resource in the classpath is loaded. A metadataReader is instantiated in order to access the class metadata. It relies on AnnotationUtils to process annotations and metaannotations. AnnotationUtils is filling its caches in the process. 
 
 EntityRoot.java is in the queue as a resource to be loaded (before candidate entities??). AnnotationUtils detect it has a @Document annotation.
 @Document is locally declared for this class, so Document is not going to be marked as an annotation to be synthesize when it should be. 
+
 When it is time to BasicMongoPersistentEntity to do its job creating a persistententity for annotated types, @Document is stored in AnnotationUtils synthesizableCache as not synthesizable when it should be. 
 
 
