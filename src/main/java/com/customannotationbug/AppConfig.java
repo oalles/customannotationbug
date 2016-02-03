@@ -38,7 +38,7 @@ public class AppConfig extends AbstractMongoConfiguration {
 	}
 
 	public String getMappingBasePackage() {
-		return "es.neivi";
+		return "com.customannotationbug";
 	}
 
 	public Set<Class<?>> getInitialEntitySet() throws ClassNotFoundException {
@@ -47,8 +47,10 @@ public class AppConfig extends AbstractMongoConfiguration {
 		Set<Class<?>> initialEntitySet = new HashSet<Class<?>>();
 
 		if (StringUtils.hasText(basePackage)) {
+			
 			ClassPathScanningCandidateComponentProvider componentProvider = new ClassPathScanningCandidateComponentProvider(
 					false);
+			
 			componentProvider.addIncludeFilter(new AnnotationTypeFilter(EventRoot.class));
 
 			for (BeanDefinition candidate : componentProvider.findCandidateComponents(basePackage)) {
