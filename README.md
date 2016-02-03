@@ -1,6 +1,7 @@
 ### DESCRIPTION
 
 **1. Custom annotation to mark an event hierarchy:**
+
 [EventRoot](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/annotation/EventRoot.java)
 Notice that it is not mark as @Inherited. Remember that @Document is mark as @Inherited (yet?). 
 Notice that @EventRoot attributes are mark as "AliasFor" attributes for @Document annotation attributes. 
@@ -9,12 +10,14 @@ So i would expect that using AnnotationUtils finders on @EventRoot annotated ent
 See that, that is what BasicMongoPersistentEntity constructor does. It is provided with a candidate entity, and try to find its @Document attributes. 
 
 **2. Event hierarchy:**
+
 [UserEvent](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/entities/UserEvent.java)
 [UserCreatedEvent](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/entities/UserCreatedEvent.java)
 
 Notice @EventRoot is declared locally on UserEvent, but not on UserCreatedEvent. Notice that it has a collection attribute, a collection name, set to a given value. 
 
 **3. Config class definition.**
+
 [AppConfig](https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/AppConfig.java)
 
 Notice it is a concrete implementation for [AbstractMongoConfiguration](https://github.com/oalles/spring-data-mongodb/blob/master/spring-data-mongodb/src/main/java/org/springframework/data/mongodb/config/AbstractMongoConfiguration.java)
@@ -22,6 +25,7 @@ Notice it is a concrete implementation for [AbstractMongoConfiguration](https://
 Notice a  custom implementation is provided for getInitialEntitySet() cause we are only interested in EventRoot annotated entities. 
 
 **4. Test**
+
 (Tests)[https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/test/java/com/customannotationbug/tests/Tests.java]
 
 *Expected behavior*. 
@@ -44,7 +48,7 @@ When using AnnotationUtils.findAnnotation() would it be possible to synthesize A
 I went a bit deeper with this, but it seems there is a problem with AnnotationUtils caches.
 Annotation filters are used when looking for candidates entities in the classpath to be loaded. 
 
-Just consider @EventRoot annotated resources.See (getInitialEntitySet())[https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/AppConfig.java]
+Just consider @EventRoot annotated resources.See ( getInitialEntitySet() )[https://github.com/oalles/spring-data-custom-annotation-bug/blob/master/src/main/java/com/customannotationbug/AppConfig.java]
  
 Each resource in the classpath is loaded. A metadataReader is instantiated in order to access the class metadata. It relies on AnnotationUtils to process annotations and metaannotations. AnnotationUtils is filling its caches in the process. 
 
